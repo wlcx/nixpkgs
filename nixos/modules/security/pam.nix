@@ -715,7 +715,7 @@ let
     };
   }));
 
-  motd = pkgs.writeText "motd" config.users.motd;
+  motd = if builtins.isPath config.users.motd then config.users.motd else pkgs.writeText "motd" config.users.motd;
 
   makePAMService = name: service:
     { name = "pam.d/${name}";
@@ -1113,7 +1113,7 @@ in
     users.motd = mkOption {
       default = null;
       example = "Today is Sweetmorn, the 4th day of The Aftermath in the YOLD 3178.";
-      type = types.nullOr types.lines;
+      type = types.nullOr types.oneOf [ types.lines types.path ];
       description = "Message of the day shown to users when they log in.";
     };
 
