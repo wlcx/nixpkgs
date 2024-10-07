@@ -1,0 +1,21 @@
+diff --git a/authority/http_client_test.go b/authority/http_client_test.go
+index b7698e94..1b76317d 100644
+--- a/authority/http_client_test.go
++++ b/authority/http_client_test.go
+@@ -66,16 +66,6 @@ func Test_newHTTPClient(t *testing.T) {
+ 	auth := testAuthority(t)
+ 	chain := mustCertificate(t, auth, csr)
+ 
+-	t.Run("SystemCertPool", func(t *testing.T) {
+-		resp, err := auth.httpClient.Get("https://smallstep.com")
+-		require.NoError(t, err)
+-		assert.Equal(t, http.StatusOK, resp.StatusCode)
+-		b, err := io.ReadAll(resp.Body)
+-		assert.NoError(t, err)
+-		assert.NotEmpty(t, b)
+-		assert.NoError(t, resp.Body.Close())
+-	})
+-
+ 	t.Run("LocalCertPool", func(t *testing.T) {
+ 		srv := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+ 			fmt.Fprint(w, "ok")
