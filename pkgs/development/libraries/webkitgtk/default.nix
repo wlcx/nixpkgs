@@ -73,6 +73,7 @@
   enableGeoLocation ? true,
   enableExperimental ? false,
   withLibsecret ? true,
+  withGstreamer ? true,
   systemdSupport ? lib.meta.availableOn clangStdenv.hostPlatform systemdLibs,
   testers,
   fetchpatch,
@@ -158,8 +159,6 @@ clangStdenv.mkDerivation (finalAttrs: {
     libepoxy
     libjxl
     gnutls
-    gst-plugins-bad
-    gst-plugins-base
     harfbuzz
     hyphen
     icu
@@ -213,6 +212,10 @@ clangStdenv.mkDerivation (finalAttrs: {
   ++ lib.optionals withLibsecret [
     libsecret
   ]
+  ++ lib.optionals withGstreamer [
+    gst-plugins-bad
+    gst-plugins-base
+  ]
   ++ lib.optionals (lib.versionAtLeast gtk4.version "4.0") [
     wayland-protocols
   ];
@@ -230,6 +233,7 @@ clangStdenv.mkDerivation (finalAttrs: {
       "-DENABLE_INTROSPECTION=ON"
       "-DPORT=GTK"
       "-DUSE_LIBSECRET=${cmakeBool withLibsecret}"
+      "-DUSE_GSTREAMER=${cmakeBool withGstreamer}"
       "-DENABLE_EXPERIMENTAL_FEATURES=${cmakeBool enableExperimental}"
     ]
     ++ lib.optionals clangStdenv.hostPlatform.isLinux [
