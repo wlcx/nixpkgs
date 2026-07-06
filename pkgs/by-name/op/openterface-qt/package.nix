@@ -7,36 +7,50 @@
   writeText,
   qt6,
   libusb1,
+  udev,
+  pkg-config,
+  ffmpeg,
+  libx11,
+  libxrandr,
+  libxrender,
+  libva,
 }:
 let
   # Based on upstream instructions: https://github.com/TechxArtisanStudio/Openterface_QT#for-linux-users
   udevRules = writeText "60-openterface.rules" ''
-    # Serial to HID converter for keyboard/mouse control.
     # ID 1a86:7523 QinHeng Electronics CH340 serial converter
-    KERNEL=="ttyUSB[0-9]*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", TAG+="uaccess"
+    SUBSYSTEM=="ttyUSB", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", TAG+="uaccess"
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", TAG+="uaccess"
 
-    # "hidraw" device for accessing the host-target toggleable USB port.
     # ID 534d:2109 MacroSilicon Openterface
-    KERNEL=="hidraw*", ATTRS{idVendor}=="534d", ATTRS{idProduct}=="2109", TAG+="uaccess"
+    SUBSYSTEM=="usb", ATTRS{idVendor}=="534d", ATTRS{idProduct}=="2109", TAG+="uaccess"
+    SUBSYSTEM=="hidraw", ATTRS{idVendor}=="534d", ATTRS{idProduct}=="2109", TAG+="uaccess"
   '';
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "openterface-qt";
-  version = "0.3.18";
+  version = "0.5.25";
   src = fetchFromGitHub {
     owner = "TechxArtisanStudio";
     repo = "Openterface_QT";
     rev = "${finalAttrs.version}";
-    hash = "sha256-yD71UOi6iRd9N3NeASUzqoeHMcTYIqkysAfxRm7GkOA=";
+    hash = "sha256-NvbPrYmTigQ6SQg3MO/zmH4b0fVMfcMynsHrBeifwG8=";
   };
   nativeBuildInputs = [
     copyDesktopItems
     qt6.wrapQtAppsHook
     qt6.qmake
     qt6.qttools
+    pkg-config
   ];
   buildInputs = [
     libusb1
+    udev
+    ffmpeg
+    libva
+    libx11
+    libxrandr
+    libxrender
     qt6.qtbase
     qt6.qtmultimedia
     qt6.qtserialport
