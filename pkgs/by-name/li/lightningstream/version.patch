@@ -1,0 +1,11 @@
+diff --git a/cmd/lightningstream/main.go b/cmd/lightningstream/main.go
+index e2a31ba..9b6edd1 100644
+--- a/cmd/lightningstream/main.go
++++ b/cmd/lightningstream/main.go
+@@ -14,6 +14,5 @@ import (
+ )
+ 
+ func main() {
+-	commands.SetBuildInfo("Lightning Stream")
+ 	commands.Execute()
+ }

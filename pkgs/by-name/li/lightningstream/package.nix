@@ -7,43 +7,35 @@
   versionCheckHook,
   nix-update-script,
 }:
-let
-  version = "0.4.3";
-in
-buildGoModule {
+buildGoModule (finalAttrs: {
   pname = "lightningstream";
-  inherit version;
+  version = "1.0.3";
 
   src = fetchFromGitHub {
     owner = "PowerDNS";
     repo = "lightningstream";
-    tag = "v${version}";
-    hash = "sha256-gnLmqm35HHpQlglKjw57NBMs8jMAHDieWlnE3OAQR4I=";
+    tag = "v${finalAttrs.version}";
+    hash = "sha256-r6pOHt5KGzILZLparLq2u7AOvIYASaScmNcOSI7kEVY=";
   };
+  # Disable reading version from go's debug/buildinfo (since it's not available without .git), which allows us to set the version via linker flags as god intended.
+  patches = [
+    ./version.patch
+  ];
 
   ldflags = [
     "-s"
     "-w"
-    "-X main.version=${version}"
+    "-X github.com/PowerDNS/lightningstream/cmd/lightningstream/commands.mainVersion=${finalAttrs.version}"
   ];
 
-  vendorHash = "sha256-wkLoaR46l+jCm3TJDflcuI2hDvluoH2o5lLIqtrVRqo=";
+  vendorHash = "sha256-19WrmUuUxkhvH8gLtGAghMUX9cjUpY4Go4KPGKwJjB0=";
 
   nativeBuildInputs = [ installShellFiles ];
 
   # Install shell completions so long as we can run the binary to do so. This means that
   # when cross compiling we may not be able to generate shell completions.
   # See https://github.com/NixOS/nixpkgs/issues/308283
-  #
-  # Dummy config file is currently required to generate completions. This may be fixed
-  # upstream; see https://github.com/PowerDNS/lightningstream/issues/85
   postInstall = lib.optionalString (stdenv.buildPlatform.canExecute stdenv.hostPlatform) ''
-    cat <<END > lightningstream.yaml
-    lmdbs:
-      dummy:
-        path: dummy
-    END
-
     installShellCompletion \
       --cmd lightningstream \
       --bash <($out/bin/lightningstream completion bash) \
@@ -52,6 +44,7 @@ buildGoModule {
   '';
 
   nativeInstallCheckInputs = [ versionCheckHook ];
+  versionCheckProgramArg = "version";
   doInstallCheck = true;
 
   passthru = {
@@ -65,4 +58,4 @@ buildGoModule {
     homepage = "https://doc.powerdns.com/lightningstream/latest/index.html";
     maintainers = with lib.maintainers; [ samw ];
   };
-}
+})
